@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cbotpro.live – Let's Build Trading Bots demo</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f6;--p:#fff;--ink:#14213d;--mu:#5d6b82;--ln:#d8e0ea;--up:#0e8f6b;--dn:#d1495b;--ac:#e09f1f;--bk:#e8edf6}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1726;--p:#18233a;--ink:#eaf0fa;--mu:#93a1ba;--ln:#2a3856;--up:#2fc79a;--dn:#f06a7c;--bk:#202d48}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 "DM Sans",system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 24px;background:var(--p);border-bottom:1px solid var(--ln)}
+.brand{font:700 22px "Bricolage Grotesque",sans-serif}.brand span{color:var(--ac)}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{border:0;background:none;padding:8px 14px;border-radius:10px;cursor:pointer;color:var(--mu);font:500 15px inherit}
+nav button[aria-selected=true]{background:var(--bk);color:var(--ink)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.sd{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--mu)}.dot.ok{background:var(--up)}.dot.bad{background:var(--dn)}
+main{max-width:1150px;margin:0 auto;padding:16px 24px}
+.strip{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;margin-bottom:14px}
+.strip>div{background:var(--p);border:1px solid var(--ln);border-radius:12px;padding:8px 12px}
+.strip b{display:block;font:700 18px "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+.strip span,label{font-size:12.5px;color:var(--mu);display:block}
+@media(max-width:760px){.strip{grid-template-columns:1fr 1fr}.strip>div:first-child{grid-column:1/-1}main{padding:12px}}
+section{display:none}section.on{display:block}
+.g{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:14px}
+@media(max-width:860px){.g{grid-template-columns:1fr}}
+.pn{background:var(--p);border:1px solid var(--ln);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{font:700 19px "Bricolage Grotesque",sans-serif;margin:0 0 10px}
+select,input[type=number]{width:100%;background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:8px;font:inherit;color:inherit}
+.r{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-bottom:10px}
+.price{font:700 clamp(34px,6vw,50px)/1 "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+.price.up{color:var(--up)}.price.dn{color:var(--dn)}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.ld{font:700 28px "Bricolage Grotesque",sans-serif;background:var(--bk);border-radius:10px;padding:2px 14px;text-align:center}
+canvas{width:100%;height:240px;display:block;margin-top:10px}
+.bs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.buy,.run,.stop{border:0;border-radius:10px;padding:12px;font:600 15px inherit;color:#fff;cursor:pointer;background:var(--up)}
+.buy.f,.stop{background:var(--dn)}
+.buy:disabled,.run:disabled,.stop:disabled{opacity:.4;cursor:not-allowed}
+.sm{border:1px solid var(--ln);background:var(--p);padding:8px 14px;border-radius:10px;cursor:pointer;font:inherit;color:inherit}
+.w{color:var(--up)}.l{color:var(--dn)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:460px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--ln);font-size:14px}
+th{color:var(--mu);font-weight:500}.sc{overflow-x:auto;max-height:300px;overflow-y:auto}
+.cs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.dc{width:64px;height:64px;border-radius:50%;background:var(--bk);border:3px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.dc b{font:700 20px "Bricolage Grotesque",sans-serif}.dc span{font-size:11px;color:var(--mu)}
+.dc.hi{border-color:var(--up)}.dc.lo{border-color:var(--dn)}.dc.cur{background:var(--ac);color:#14213d}.dc.cur span{color:#14213d}
+.nt{font-size:12.5px;color:var(--mu);border-left:3px solid var(--dn);padding-left:10px;margin:10px 0 0}
+details{background:var(--p);border:1px solid var(--ln);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}
+footer{max-width:1150px;margin:0 auto;padding:6px 24px 28px;font-size:12.5px;color:var(--mu)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">cbot<span>.live</span></div>
+  <nav role="tablist">
+    <button role="tab" data-t="trade" aria-selected="true">Trade</button>
+    <button role="tab" data-t="digits" aria-selected="false">Digits</button>
+    <button role="tab" data-t="bot" aria-selected="false">Bot builder</button>
+    <button role="tab" data-t="plan" aria-selected="false">Trading plan</button>
+    <button role="tab" data-t="learn" aria-selected="false">Learn</button>
+  </nav>
+  <div class="sd"><span class="dot" id="dot"></span><span id="status">Connecting…</span></div>
+</header>
+<main>
+  <div class="strip">
+    <div><label for="sym">Market</label><select id="sym"></select></div>
+    <div><b id="bal">1,000.00</b><span>Demo balance</span></div>
+    <div><b id="pl">0.00</b><span>Profit/loss</span></div>
+    <div><b id="n">0</b><span>Trades</span></div>
+    <div><b id="wr">–</b><span>Win rate</span></div>
+  </div>
+
+<section id="trade" class="on"><div class="g">
+  <div class="pn">
+    <div class="top"><div class="price" id="price">–</div><div><label>Last digit</label><div class="ld" id="ld">–</div></div></div>
+    <canvas id="chart" aria-label="Live price chart"></canvas>
+  </div>
+  <div class="pn">
+    <h2>Place a trade</h2>
+    <div class="r"><div><label for="stake">Stake</label><input id="stake" type="number" min="1" value="10"></div>
+    <div><label for="ticks">Duration (ticks)</label><input id="ticks" type="number" min="1" max="10" value="5"></div></div>
+    <div class="bs" id="bs">
+      <button class="buy" data-ty="Rise">Rise</button><button class="buy f" data-ty="Fall">Fall</button>
+      <button class="buy" data-ty="Even">Even</button><button class="buy f" data-ty="Odd">Odd</button>
+      <button class="buy" data-ty="Over 4">Over 4</button><button class="buy f" data-ty="Under 5">Under 5</button>
+    </div>
+    <p class="nt">Rise/Fall compares the exit price with the entry price. Even/Odd and Over/Under look at the last digit of the exit price.</p>
+  </div>
+</div>
+<div class="pn"><h2>Trades</h2><div class="sc"><table><thead><tr><th>Type</th><th>Source</th><th>Stake</th><th>Entry</th><th>Exit</th><th>Result</th></tr></thead><tbody id="log"><tr><td colspan="6" style="color:var(--mu)">No trades yet.</td></tr></tbody></table></div></div>
+</section>
+
+<section id="digits">
+  <div class="pn"><h2>Last digit frequency (last 100 ticks)</h2><div class="cs" id="circ"></div>
+  <p class="nt">Green marks the most frequent digit, red the least, and gold the latest digit. On random markets, past frequency does not predict the next digit.</p></div>
+</section>
+
+<section id="bot"><div class="g">
+  <div class="pn"><h2>Build your bot</h2>
+    <div class="r"><div><label for="btype">Trade type</label><select id="btype"><option>Rise</option><option>Fall</option><option>Even</option><option>Odd</option><option>Over 4</option><option>Under 5</option></select></div>
+    <div><label for="bticks">Duration (ticks)</label><input id="bticks" type="number" min="1" max="10" value="5"></div>
+    <div><label for="bstake">Initial stake</label><input id="bstake" type="number" min="1" value="10"></div></div>
+    <label for="cond">Buy when</label>
+    <select id="cond"><option value="any">Every tick (when no trade is open)</option><option value="up3">The last 3 ticks were rising</option><option value="down3">The last 3 ticks were falling</option><option value="even">The last digit is even</option><option value="odd">The last digit is odd</option></select>
+    <div class="r" style="margin-top:10px"><div><label for="mult">Stake multiplier after a loss</label><input id="mult" type="number" min="1" step="0.1" value="2"></div>
+    <div><label for="steps">Maximum loss steps</label><input id="steps" type="number" min="0" value="3"></div></div>
+    <div class="r"><div><label for="tp">Take profit</label><input id="tp" type="number" min="1" value="50"></div>
+    <div><label for="sl">Stop loss</label><input id="sl" type="number" min="1" value="100"></div>
+    <div><label for="mx">Maximum trades</label><input id="mx" type="number" min="1" value="20"></div></div>
+    <div style="display:flex;gap:10px"><button class="run" id="run" disabled>Run bot</button><button class="stop" id="stop" disabled>Stop</button></div>
+    <p id="bmsg" style="color:var(--mu);min-height:24px"></p>
+    <p class="nt">Raising the stake after losses can lose money quickly. Always set a stop loss.</p>
+  </div>
+  <div class="pn"><h2>Import a bot</h2><p style="color:var(--mu)">Choose a bot file (.xml) to see what it contains.</p>
+    <input type="file" id="file" accept=".xml" aria-label="Bot file"><p id="imp" style="font-weight:500"></p>
+    <p class="nt" style="border-color:var(--ac)">Preview only. The full site would load the bot into the builder.</p></div>
+</div></section>
+
+<section id="plan"><div class="pn"><h2>Trading plan</h2>
+  <div class="r"><div><label for="pc">Starting capital</label><input id="pc" type="number" min="1" value="100"></div>
+  <div><label for="pp">Daily target (%)</label><input id="pp" type="number" min="0.1" step="0.1" value="5"></div>
+  <div><label for="pd">Days (max 60)</label><input id="pd" type="number" min="1" max="60" value="14"></div></div>
+  <div class="sc"><table><thead><tr><th>Day</th><th>Start balance</th><th>Target profit</th><th>End balance</th><th>Actual profit</th><th>Status</th></tr></thead><tbody id="ptb"></tbody></table></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="sm" id="psave">Save</button><button class="sm" id="pload">Load</button><button class="sm" id="pcsv">Download CSV</button><button class="sm" id="preset">Reset</button></div>
+  <p id="pmsg" style="color:var(--mu);min-height:22px"></p>
+  <p class="nt">Targets are goals, not forecasts. Markets can lose money on any day, and compounding targets grow very fast, so long plans are unrealistic.</p></div>
+</section>
+
+<section id="learn">
+  <h2>Learn</h2>
+  <details open><summary>How do I build my first bot?</summary><p>Open Bot builder, choose a trade type, a stake, and when to buy. Set a stop loss and take profit, then press Run bot. It trades on your demo balance.</p></details>
+  <details><summary>What do the digit tools show?</summary><p>They count the last digit of recent prices. This helps you see patterns in the past, but each new digit is random.</p></details>
+  <details><summary>What does the stake multiplier do?</summary><p>After a loss, the next stake is multiplied. A losing streak grows stakes fast, so keep loss steps low and use a stop loss.</p></details>
+  <details><summary>Is real money used here?</summary><p>No. This demo uses a virtual balance and simulated payouts of 85%. Real accounts would connect through Deriv login.</p></details>
+  <details><summary>Is trading risky?</summary><p>Yes. You can lose some or all of the money you trade. Always practise on a demo account first.</p></details>
+</section>
+</main>
+<footer>Demo mode: prices are live from Deriv’s public feed; trades are simulated and place no real orders. Trading carries a risk of loss.</footer>
+<script>
+const $=id=>document.getElementById(id),PAY=.85;
+const FEED=['wss://api.derivws.com/trading/v1/options/ws/public','wss://ws.binaryws.com/websockets/v3?app_id=1089'];
+const FB=[['1HZ100V','Volatility 100 (1s) Index'],['R_100','Volatility 100 Index'],['R_50','Volatility 50 Index'],['R_10','Volatility 10 Index']];
+let ws,ep=0,sym=null,pts=[],dg=[],pip=2,opened=false,bal=1000,pl=0,n=0,w=0,open=[],tid=0,bot=null,rows=[],act={};
+function st(t,c){$('status').textContent=t;$('dot').className='dot '+(c||'')}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));draw();});
+function fill(l){const s=$('sym');s.innerHTML='';l.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;s.appendChild(o)});
+  const p=l.find(x=>x[0]==='1HZ100V')||l[0];s.value=p[0];sym=p[0]}
+function connect(){
+  opened=false;
+  try{ws=new WebSocket(FEED[ep])}catch(e){return nxt()}
+  ws.onopen=()=>{opened=true;st('Live','ok');ws.send(JSON.stringify({active_symbols:'brief',product_type:'basic'}));if(!sym)fill(FB);sub()};
+  ws.onmessage=e=>{const d=JSON.parse(e.data);if(d.error)return;
+    if(d.active_symbols&&d.active_symbols.length){
+      const sy=d.active_symbols.filter(s=>s.market==='synthetic_index'),src=(sy.length?sy:d.active_symbols).slice(0,30).map(s=>[s.symbol,s.display_name||s.symbol]);
+      const keep=sym;fill(src);if(keep&&src.some(x=>x[0]===keep)){$('sym').value=keep;sym=keep}else sub();}
+    if(d.tick&&d.tick.symbol===sym)tick(d.tick);};
+  ws.onclose=()=>{opened?(st('Disconnected – retrying','bad'),setTimeout(connect,2000)):nxt()};
+}
+function nxt(){ep++;if(ep<FEED.length)connect();else{ep=0;st('Cannot reach Deriv feed – retrying','bad');setTimeout(connect,4000)}}
+function sub(){if(!ws||ws.readyState!==1)return;ws.send(JSON.stringify({forget_all:'ticks'}));pts=[];dg=[];ws.send(JSON.stringify({ticks:sym,subscribe:1}))}
+$('sym').onchange=e=>{sym=e.target.value;stopBot('Market changed');open.forEach(t=>bal+=t.stake);open=[];stats();sub()};
+function tick(t){
+  const q=+t.quote;if(t.pip_size!=null)pip=t.pip_size;
+  const pv=pts.length?pts[pts.length-1]:q;pts.push(q);if(pts.length>100)pts.shift();
+  const d=+q.toFixed(pip).slice(-1);dg.push(d);if(dg.length>100)dg.shift();
+  const p=$('price');p.textContent=q.toFixed(pip);p.className='price '+(q>pv?'up':q<pv?'dn':'');$('ld').textContent=d;
+  settle(q,d);if(bot)botStep();btn();draw();digits();
+}
+function btn(){document.querySelectorAll('.buy').forEach(b=>b.disabled=!pts.length);$('run').disabled=!!bot||!pts.length}
+function won(t,q,d){switch(t.type){case'Rise':return q>t.entry;case'Fall':return q<t.entry;case'Even':return d%2===0;case'Odd':return d%2===1;case'Over 4':return d>4;default:return d<5}}
+function buy(type,stake,ticks,src){
+  if(!pts.length||!(stake>0)||stake>bal)return false;
+  bal-=stake;open.push({id:++tid,type,stake,left:Math.min(10,Math.max(1,ticks||5)),entry:pts[pts.length-1],src});stats();return true;}
+function settle(q,d){
+  open=open.filter(t=>{
+    if(--t.left>0)return true;
+    const win=won(t,q,d),pr=win?t.stake*PAY:-t.stake;
+    if(win)bal+=t.stake*(1+PAY);
+    pl+=pr;n++;if(win)w++;
+    rows.unshift({t,q,pr});if(rows.length>30)rows.pop();
+    if(t.src==='bot')botDone(t,win);
+    return false;});
+  stats();logr();}
+function stats(){$('bal').textContent=bal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  $('pl').textContent=pl.toFixed(2);$('pl').className=pl>0?'w':pl<0?'l':'';$('n').textContent=n;$('wr').textContent=n?Math.round(w/n*100)+'%':'–'}
+function logr(){if(!rows.length)return;
+  $('log').innerHTML=rows.map(r=>`<tr><td>${r.t.type}</td><td>${r.t.src}</td><td>${r.t.stake.toFixed(2)}</td><td>${r.t.entry.toFixed(pip)}</td><td>${r.q.toFixed(pip)}</td><td class="${r.pr>0?'w':'l'}">${r.pr>0?'+':''}${r.pr.toFixed(2)}</td></tr>`).join('')}
+document.querySelectorAll('.buy').forEach(b=>b.onclick=()=>buy(b.dataset.ty,+$('stake').value,+$('ticks').value,'manual'));
+function ok(c){const l=pts.slice(-4),d=dg[dg.length-1];
+  if(c==='any')return true;
+  if(c==='even')return d%2===0;if(c==='odd')return d%2===1;
+  if(l.length<4)return false;
+  return c==='up3'?(l[1]>l[0]&&l[2]>l[1]&&l[3]>l[2]):(l[1]<l[0]&&l[2]<l[1]&&l[3]<l[2]);}
+function botStep(){if(open.some(t=>t.src==='bot')||!ok($('cond').value))return;
+  if(!buy($('btype').value,bot.cur,+$('bticks').value,'bot'))stopBot('Not enough balance');}
+function botDone(t,win){
+  const base=+$('bstake').value,m=Math.max(1,+$('mult').value),ms=+$('steps').value;
+  if(win){bot.loss=0;bot.cur=base}else{bot.loss++;bot.cur=bot.loss<=ms?t.stake*m:base;if(bot.loss>ms)bot.loss=0}
+  bot.p+=win?t.stake*PAY:-t.stake;bot.n++;
+  if(bot.p>=+$('tp').value)stopBot('Take profit reached');
+  else if(-bot.p>=+$('sl').value)stopBot('Stop loss reached');
+  else if(bot.n>=+$('mx').value)stopBot('Maximum trades reached');}
+function stopBot(why){if(!bot)return;bot=null;$('stop').disabled=true;$('bmsg').textContent=why+'.';btn()}
+$('run').onclick=()=>{bot={cur:+$('bstake').value,loss:0,p:0,n:0};$('stop').disabled=false;$('bmsg').textContent='Bot running… trades appear on the Trade tab.';btn()};
+$('stop').onclick=()=>stopBot('Stopped');
+function draw(){
+  const c=$('chart'),r=window.devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;if(!W)return;
+  c.width=W*r;c.height=H*r;const g=c.getContext('2d');g.scale(r,r);if(pts.length<2)return;
+  const s=getComputedStyle(document.documentElement),mn=Math.min(...pts),mx=Math.max(...pts),pd=(mx-mn||1)*.15,lo=mn-pd,hi=mx+pd;
+  const X=i=>i/99*(W-58),Y=v=>H-8-(v-lo)/(hi-lo)*(H-16),col=s.getPropertyValue(pts[pts.length-1]>=pts[0]?'--up':'--dn');
+  g.font='11px DM Sans, sans-serif';g.fillStyle=s.getPropertyValue('--mu');g.strokeStyle=s.getPropertyValue('--ln');g.lineWidth=1;
+  for(let i=0;i<4;i++){const v=lo+(hi-lo)*i/3,y=Y(v);g.beginPath();g.moveTo(0,y);g.lineTo(W-54,y);g.stroke();g.fillText(v.toFixed(pip),W-52,y+4)}
+  g.beginPath();pts.forEach((v,i)=>i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v)));g.strokeStyle=col;g.lineWidth=2;g.lineJoin='round';g.stroke();
+  g.beginPath();g.arc(X(pts.length-1),Y(pts[pts.length-1]),4,0,7);g.fillStyle=col;g.fill();}
+function digits(){
+  const c=Array(10).fill(0);dg.forEach(d=>c[d]++);
+  const t=dg.length||1,mx=Math.max(...c),mn=Math.min(...c),la=dg[dg.length-1],ok=dg.length>9;
+  $('circ').innerHTML=c.map((v,i)=>`<div class="dc${i===la?' cur':''}${ok&&v===mx?' hi':''}${ok&&v===mn?' lo':''}"><b>${i}</b><span>${(v/t*100).toFixed(1)}%</span></div>`).join('')}
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{const d=new DOMParser().parseFromString(rd.result,'text/xml');
+    $('imp').textContent=d.querySelector('parsererror')?'This file is not valid bot XML.':`${f.name}: ${d.getElementsByTagName('block').length} blocks found.`};rd.readAsText(f)};
+function pst(i,t){const a=act[i];return a===undefined||a===''?'Pending':a>=t?'<b class="w">Achieved</b>':'<b class="l">Not achieved</b>'}
+function plan(){
+  const c=+$('pc').value||0,p=(+$('pp').value||0)/100,d=Math.min(60,Math.max(1,+$('pd').value|0));let b=c,h='';
+  for(let i=1;i<=d;i++){const t=b*p;h+=`<tr><td>${i}</td><td>${b.toFixed(2)}</td><td>${t.toFixed(2)}</td><td>${(b+t).toFixed(2)}</td><td><input class="act" type="number" data-i="${i}" data-t="${t}" value="${act[i]??''}" aria-label="Actual profit day ${i}" style="width:100px"></td><td id="s${i}">${pst(i,t)}</td></tr>`;b+=t}
+  $('ptb').innerHTML=h}
+['pc','pp','pd'].forEach(id=>$(id).oninput=plan);
+$('ptb').oninput=e=>{const i=e.target.dataset.i;if(!i)return;act[i]=e.target.value===''?'':+e.target.value;$('s'+i).innerHTML=pst(i,+e.target.dataset.t)};
+$('psave').onclick=()=>{try{localStorage.setItem('cbot-plan',JSON.stringify({c:$('pc').value,p:$('pp').value,d:$('pd').value,act}));$('pmsg').textContent='Plan saved in this browser.'}catch(e){$('pmsg').textContent='Saving is not available in this browser.'}};
+$('pload').onclick=()=>{try{const s=JSON.parse(localStorage.getItem('cbot-plan'));if(!s)throw 0;$('pc').value=s.c;$('pp').value=s.p;$('pd').value=s.d;act=s.act||{};plan();$('pmsg').textContent='Plan loaded.'}catch(e){$('pmsg').textContent='No saved plan found.'}};
+$('preset').onclick=()=>{act={};$('pc').value=100;$('pp').value=5;$('pd').value=14;plan();$('pmsg').textContent='Plan reset.'};
+$('pcsv').onclick=()=>{const c=+$('pc').value||0,p=(+$('pp').value||0)/100,d=Math.min(60,Math.max(1,+$('pd').value|0));let b=c,s='Day,Start balance,Target profit,End balance,Actual profit\n';
+  for(let i=1;i<=d;i++){const t=b*p;s+=`${i},${b.toFixed(2)},${t.toFixed(2)},${(b+t).toFixed(2)},${act[i]??''}\n`;b+=t}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='trading-plan.csv';a.click()};
+window.addEventListener('resize',draw);
+plan();digits();connect();
+</script>
+</body>
+</html>
